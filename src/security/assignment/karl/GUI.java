@@ -145,8 +145,8 @@ public class GUI extends JFrame {
 					 */
                         if(!plainTextTA.getText().equals("")) {
                             try {
+                                cipherTextTA.setText("Encryption completed of " + plainTextTA.getText());
                                 RSA.encryptFile(plainTextTA.getText(), publicKeyTF.getText(), nTF.getText());
-                                cipherTextTA.setText("Completed");
                             } catch (Exception e1) {
                                 fileNotFound();
                             }
@@ -188,8 +188,8 @@ public class GUI extends JFrame {
 					 */
                         if(!cipherTextTA.getText().equals("")) {
                             try {
+                                plainTextTA.setText("Decryption completed of " + cipherTextTA.getText());
                                 RSA.decryptFile(cipherTextTA.getText(), privateKeyTF.getText(), nTF.getText());
-                                plainTextTA.setText("Completed");
                             } catch (Exception e1) {
                                 fileNotFound();
                             }
@@ -219,5 +219,13 @@ public class GUI extends JFrame {
      */
     private void fileNotFound(){
         JOptionPane.showMessageDialog(null, "No such file exists", "Attention!", JOptionPane.WARNING_MESSAGE);
+    }
+
+    public void setPlainTextTA(String message){
+        plainTextTA.setText(message);
+    }
+
+    public void setCipherTextTA(String message){
+        cipherTextTA.setText(message);
     }
 }

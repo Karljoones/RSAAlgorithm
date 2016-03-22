@@ -4,6 +4,9 @@ package security.assignment.karl;
  * Created by Karl on 21/03/2016.
  *
  * This class controls the encryption and the decryption of plaintext and of the files that are input into the system.
+ *
+ * To use:
+ * Put plaintext files into the plainFiles/ directory, and the decrypted files in the encryptedFiles/ directory.
  */
 
 import java.io.FileOutputStream;
@@ -15,19 +18,18 @@ import java.nio.file.Paths;
 import java.security.SecureRandom;
 
 public class RSA {
-    private static int bitlen = 128; // bit length of numbers
+    // Bit length
+    private static int bitlen = 128;
 
     /**
-     * Encrypt the given plaintext message.
+     * Encrypt the given plaintext message into ciphertext
      */
     public static String encrypt(String message, String e, String n) {
-        // Take out the spaces, non-alphanumeric characters and put the string in lower case
+        // Take out the spaces, non-alphanumeric characters and put the string in lower case.
         String newMessage = message.replaceAll("\\s+", "");
         newMessage = newMessage.replaceAll("[^A-Za-z0-9]", "");
         newMessage = newMessage.toLowerCase();
-        BigInteger m = new BigInteger(newMessage.getBytes()); // convert String to
-        // BigInteger for
-        // encryption
+        BigInteger m = new BigInteger(newMessage.getBytes()); // convert String to BigInteger for encryption
         BigInteger eB = new BigInteger(e, 16);// parse hex String to BigInteger
         BigInteger nB = new BigInteger(n, 16);// parse hex String to BigInteger
         BigInteger tmp, res = BigInteger.ZERO;
@@ -46,11 +48,10 @@ public class RSA {
     }
 
     /**
-     * Decrypt the given ciphertext message.
+     * Decrypt the given ciphertext message into plaintext
      */
     public static String decrypt(String message, String d, String n) {
-        BigInteger m = new BigInteger(message, 16); // parse hex String to
-        // BigInteger
+        BigInteger m = new BigInteger(message, 16); // parse hex String to BigInteger
         BigInteger dB = new BigInteger(d, 16);// parse hex String to BigInteger
         BigInteger nB = new BigInteger(n, 16);// parse hex String to BigInteger
         BigInteger tmp, res = BigInteger.ZERO;
@@ -65,7 +66,7 @@ public class RSA {
             i++;
             m = m.divide(nB);
         }
-        return new String(res.toByteArray());// decrypt and
+        return new String(res.toByteArray());
     }
 
     /**
@@ -89,8 +90,7 @@ public class RSA {
             q = new BigInteger(bitlen / 2, 100, r);
         }
         n = p.multiply(q); // n=p*q
-        BigInteger m = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE)); // Euclidean
-        // algorithm;
+        BigInteger m = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE)); // Euclidean Algorithm
         e = new BigInteger("3");
         while (gcd(m, e).intValue() > 1) { // find Coprime integer to m;
             e = e.add(new BigInteger("2"));
@@ -101,13 +101,12 @@ public class RSA {
     }
 
     /**
-     * Extended euclidean algorithm. The multiplicative inverse.
+     * The multiplicative inverse.
      */
     private static BigInteger mul_inv(BigInteger a, BigInteger b) {
 
         BigInteger b0 = b, tmp, q;
-        // we use q to remember quotient, tmp as temporary variable, b0 to
-        // remember initial value of b
+        // we use q to remember quotient, tmp as temporary variable, b to remember initial value of b
         BigInteger x0 = BigInteger.ZERO, x1 = BigInteger.ONE;
         if (b.equals(BigInteger.ONE))
             return BigInteger.ONE;
@@ -121,8 +120,7 @@ public class RSA {
             x1 = tmp;
         }
         if (x1.compareTo(BigInteger.ZERO) < 0)
-            x1 = x1.add(b0); // if result < 0, we can get it modulo ( (-a) mod n
-        // = n - a = (-a) + n)
+            x1 = x1.add(b0); // if result < 0, we can get it modulo ( (-a) mod n = n - a = (-a) + n)
         return x1;
     }
 
@@ -136,18 +134,14 @@ public class RSA {
         power = b.mod(m);
         String t = e.toString(2); // convert the power to string of binary
         String reverse = new StringBuffer(t).reverse().toString();
-        for (int i = 0; i < reverse.length(); i++) { // this loop to go over the
-            // string char by char
-            // by reverse
-            if (reverse.charAt(i) == '1') { // the start of if statement when
-                // the char is 1
+        for (int i = 0; i < reverse.length(); i++) { // this loop to go over the string char by char by reverse
+            if (reverse.charAt(i) == '1') { // the start of if statement when the char is 1
                 x = x.multiply(power);
                 x = x.mod(m);
             }
             power = power.multiply(power);
             power = power.mod(m);
-            // the end of if statement
-        } // the end of for loop
+        }
         return x;
     }
 
@@ -157,15 +151,14 @@ public class RSA {
      */
     public static BigInteger encryptFile(String path, String e, String n) throws IOException {
         String fileName = path; // save file name
-        //path = "plainFiles/" + path;// add directory name to the file path
+        path = "plainFiles/" + path;// add directory name to the file path
         BigInteger eB = new BigInteger(e, 16); // parse hex String to BigInteger
         BigInteger nB = new BigInteger(n, 16);
-        //Path filePath = Paths.get(path);// create path to file
-        Path filePath = Paths.get(fileName);
-        System.out.println(filePath.toString());
-        BigInteger file = new BigInteger(Files.readAllBytes(filePath)); // generate BigInteger from
-        // byte array, which was
-        // got from file
+        Path filePath = Paths.get(path);// create path to file
+        BigInteger file = new BigInteger(Files.readAllBytes(filePath)); // generate BigInteger from byte array, which was got from file
+
+        gui.setPlainTextTA("File contents:\n" + Files.readAllLines(filePath).toString());
+
         BigInteger encrypted = BigInteger.ZERO;
         BigInteger tmp;
         int i = 0;
@@ -179,8 +172,9 @@ public class RSA {
             i++;
             file = file.divide(nB);
         }
-        // with the help of FileOutputStream generate new file with the same name, adding "E-" to distinguish the file
-        FileOutputStream fos = new FileOutputStream("encryptedFiles/" + "E-" + fileName);
+
+        // Write the encrypted message into a file in the encryptedFiles/ directory
+        FileOutputStream fos = new FileOutputStream("encryptedFiles/" + fileName);
         fos.write(encrypted.toByteArray());
         fos.close();
         return encrypted;
@@ -196,8 +190,9 @@ public class RSA {
         BigInteger dB = new BigInteger(d, 16);
         BigInteger nB = new BigInteger(n, 16);
         Path filePath = Paths.get(path);
-        //Path filePath = Paths.get(fileName);
         BigInteger file = new BigInteger(Files.readAllBytes(filePath));
+        gui.setCipherTextTA("File contents:\n" + Files.readAllBytes(filePath).toString());
+
         BigInteger decrypted = BigInteger.ZERO;
         BigInteger tmp;
         int i = 0;
@@ -208,8 +203,8 @@ public class RSA {
             file = file.divide(nB);
         }
 
-        //
-        FileOutputStream fos = new FileOutputStream("plainFiles/" + fileName	);
+        // Write plaintext back into plainFiles/ directory
+        FileOutputStream fos = new FileOutputStream("plainFiles/" + fileName);
         fos.write(decrypted.toByteArray());
         fos.close();
     }
@@ -224,8 +219,10 @@ public class RSA {
             return gcd(b, a.mod(b)); // when a divided into b, a mod b = 0, so a is gcd;
     }
 
+    static GUI gui;
+
     public static void main(String[] args) throws IOException {
         // Initialise the security.assignment.karl.GUI.
-        new GUI();
+        gui = new GUI();
     }
 }
