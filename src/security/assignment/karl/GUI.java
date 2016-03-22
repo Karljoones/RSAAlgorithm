@@ -2,6 +2,8 @@ package security.assignment.karl;
 
 /**
  * Created by Karl on 21/03/2016.
+ *
+ * This class controls the graphical user interface for this program.
  */
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -146,7 +148,7 @@ public class GUI extends JFrame {
                                 RSA.encryptFile(plainTextTA.getText(), publicKeyTF.getText(), nTF.getText());
                                 cipherTextTA.setText("Completed");
                             } catch (Exception e1) {
-                                cipherTextTA.setText("No such file exists.");
+                                fileNotFound();
                             }
                         } else {
                             alertUser("encrypt");
@@ -189,7 +191,7 @@ public class GUI extends JFrame {
                                 RSA.decryptFile(cipherTextTA.getText(), privateKeyTF.getText(), nTF.getText());
                                 plainTextTA.setText("Completed");
                             } catch (Exception e1) {
-                                plainTextTA.setText("No such file exists.");
+                                fileNotFound();
                             }
                         } else {
                             alertUser("decrypt");
@@ -208,7 +210,14 @@ public class GUI extends JFrame {
     /**
      * Alert the user when trying to decrypt of encrypt fields.
      */
-    public void alertUser(String box){
+    private void alertUser(String box){
         JOptionPane.showMessageDialog(null, "Can not " + box.toLowerCase() + " when the field is empty.", "Attention!", JOptionPane.WARNING_MESSAGE);
+    }
+
+    /**
+     * Shows a warning to the user when the file location they entered cannot be found.
+     */
+    private void fileNotFound(){
+        JOptionPane.showMessageDialog(null, "No such file exists", "Attention!", JOptionPane.WARNING_MESSAGE);
     }
 }

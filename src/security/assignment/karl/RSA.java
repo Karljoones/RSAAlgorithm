@@ -2,6 +2,8 @@ package security.assignment.karl;
 
 /**
  * Created by Karl on 21/03/2016.
+ *
+ * This class controls the encryption and the decryption of plaintext and of the files that are input into the system.
  */
 
 import java.io.FileOutputStream;
@@ -99,7 +101,7 @@ public class RSA {
     }
 
     /**
-     * Extended euclidean algorithm.
+     * Extended euclidean algorithm. The multiplicative inverse.
      */
     private static BigInteger mul_inv(BigInteger a, BigInteger b) {
 
@@ -124,6 +126,10 @@ public class RSA {
         return x1;
     }
 
+    /**
+     * Get the mod of the BigInteger
+     * @return BigInteger
+     */
     private static BigInteger modular_pow(BigInteger b, BigInteger e, BigInteger m) {
         BigInteger x = new BigInteger("1"); // The default value of x
         BigInteger power;
@@ -151,10 +157,12 @@ public class RSA {
      */
     public static BigInteger encryptFile(String path, String e, String n) throws IOException {
         String fileName = path; // save file name
-        path = "plainFiles/" + path;// add directory name to the file path
+        //path = "plainFiles/" + path;// add directory name to the file path
         BigInteger eB = new BigInteger(e, 16); // parse hex String to BigInteger
         BigInteger nB = new BigInteger(n, 16);
-        Path filePath = Paths.get(path);// create path to file
+        //Path filePath = Paths.get(path);// create path to file
+        Path filePath = Paths.get(fileName);
+        System.out.println(filePath.toString());
         BigInteger file = new BigInteger(Files.readAllBytes(filePath)); // generate BigInteger from
         // byte array, which was
         // got from file
@@ -171,19 +179,24 @@ public class RSA {
             i++;
             file = file.divide(nB);
         }
-        // with the help of FileOutputStream generate new file with the same name
-        FileOutputStream fos = new FileOutputStream("encryptedFiles/" + fileName);
+        // with the help of FileOutputStream generate new file with the same name, adding "E-" to distinguish the file
+        FileOutputStream fos = new FileOutputStream("encryptedFiles/" + "E-" + fileName);
         fos.write(encrypted.toByteArray());
         fos.close();
         return encrypted;
     }
 
+    /**
+     * Decrypt the file
+     * @throws IOException
+     */
     public static void decryptFile(String path, String d, String n) throws IOException {
         String fileName = path;
         path = "encryptedFiles/" + path;
-        BigInteger dB = new BigInteger(d, 16);// parse hex String to BigInteger
+        BigInteger dB = new BigInteger(d, 16);
         BigInteger nB = new BigInteger(n, 16);
         Path filePath = Paths.get(path);
+        //Path filePath = Paths.get(fileName);
         BigInteger file = new BigInteger(Files.readAllBytes(filePath));
         BigInteger decrypted = BigInteger.ZERO;
         BigInteger tmp;
@@ -194,13 +207,15 @@ public class RSA {
             i++;
             file = file.divide(nB);
         }
+
+        //
         FileOutputStream fos = new FileOutputStream("plainFiles/" + fileName	);
         fos.write(decrypted.toByteArray());
         fos.close();
     }
 
     /**
-     * Get the greatest common divisor
+     * Get the greatest common divisor of two BigIntegers.
      */
     public static BigInteger gcd(BigInteger a, BigInteger b) {
         if (b.equals(BigInteger.ZERO))
